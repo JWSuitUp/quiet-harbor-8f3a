@@ -65,6 +65,26 @@ li.done .tx{color:var(--ink-3);text-decoration:line-through;text-decoration-colo
 .addrow input{width:100%;background:none;border:none;border-bottom:1px solid var(--hair-2);padding:9px 0 9px 27px;color:var(--ink);font-family:inherit;font-size:13px;outline:none}
 .addrow input::placeholder{color:var(--ink-3);opacity:.7}
 .addrow input:focus{border-bottom-color:var(--hair)}
+.ahead{margin-top:32px;padding-top:22px;border-top:1px solid var(--hair-2);max-width:520px}
+.ahead-label{margin-bottom:14px}
+.ahead-cols{display:flex;gap:28px}
+.ahead-col{flex:1;min-width:0}
+.ahead-hdr{font-size:11px;letter-spacing:.1em;color:var(--ink-2);margin-bottom:10px}
+.ahead-list{list-style:none}
+.ahead-list li{display:flex;align-items:center;gap:8px;padding:5px 0}
+.apri{flex:none;width:4px;height:4px;border-radius:50%;background:none}
+.apri.p1{background:var(--ice)}.apri.p2{background:var(--ink-3)}.apri.p3{background:var(--hair)}
+.atx{flex:1;min-width:0;font-size:12.5px;color:var(--ink-2);letter-spacing:.01em}
+.ahead-list .tag{font-size:9px;padding:0 5px;margin-left:5px}
+.adel{flex:none;color:var(--ink-3);opacity:0;cursor:pointer;font-size:14px;line-height:1;transition:opacity .15s}
+.ahead-col li:hover .adel{opacity:.5}
+.adel:hover{opacity:1;color:var(--ink-2)}
+@media(hover:none){.adel{opacity:.35}}
+.ahead-empty{font-size:12px;color:var(--ink-3);font-style:italic;padding:2px 0}
+.ahead-add{width:100%;margin-top:8px;background:none;border:none;border-bottom:1px solid var(--hair-2);padding:5px 0;color:var(--ink);font-family:inherit;font-size:11.5px;outline:none}
+.ahead-add::placeholder{color:var(--ink-3);opacity:.6}
+.ahead-add:focus{border-bottom-color:var(--hair)}
+@media(max-width:520px){.ahead-cols{flex-direction:column;gap:20px}}
 .focal-r{flex:1;display:flex;flex-direction:column;align-items:flex-end;text-align:right;padding-top:20px}
 .ring-note{margin-top:16px}
 .ring-note .whisper{margin-top:6px;color:var(--ink-3)}
@@ -158,6 +178,7 @@ footer .r{margin-left:auto}
       <div class="goal serif" id="theme">a quiet day.</div>
       <ul class="tasks" id="tasks"></ul>
       <div class="addrow"><input id="newtask" type="text" placeholder="add something for today…" autocomplete="off"></div>
+      <div class="ahead" id="ahead"></div>
     </div>
     <div class="focal-r">
       <svg width="164" height="164" viewBox="0 0 164 164">
@@ -272,13 +293,14 @@ $('signout').addEventListener('click', async e => { e.preventDefault(); await sb
 
 // ---------- load & render ----------
 let tasks = [];
+let aheadAll = [];
 async function load() {
   const t = todayStr();
   greeting(); daymeta(t); timeline(t);
   const wkStart = mondayOf(t);
   const [dayRow, taskRows, brief, habitRows, logRows, refl, mApp, mSquash, mHours, mSleep] = await Promise.all([
     sb.from('days').select('*').eq('date', t).maybeSingle(),
-    sb.from('tasks').select('*').eq('date', t).order('priority', { nullsFirst: false }).order('created_at'),
+    sb.from('tasks').select('*').gte('date', t).lte('date', addDays(t,2)).order('priority', { nullsFirst: false }).order('created_at'),
     sb.from('briefings').select('*').eq('date', t).maybeSingle(),
     sb.from('habits').select('*').eq('active', true).order('sort'),
     sb.from('habit_logs').select('*').gte('date', wkStart).lte('date', addDays(wkStart,6)),
@@ -289,8 +311,10 @@ async function load() {
     sb.from('metrics').select('*').eq('key','sleep_minutes').gte('date', addDays(t,-13)),
   ]);
   if (dayRow.data?.theme) $('theme').innerHTML = escapeHtml(dayRow.data.theme).replace(/\*(.+?)\*/g, '<em>$1</em>');
-  tasks = taskRows.data || [];
-  renderTasks(); renderBrief(brief.data);
+  const allT = taskRows.data || [];
+  tasks = allT.filter(x => x.date === t);
+  aheadAll = allT.filter(x => x.date > t);
+  renderTasks(); renderAhead(t); renderBrief(brief.data);
   renderPillars(mApp.data, mSquash.data, mSleep.data);
   renderHours(mHours.data || [], wkStart, t);
   renderSleep(mSleep.data || [], t);
@@ -354,6 +378,51 @@ $('newtask').addEventListener('keydown', async e => {
   const text = raw.replace(/#[\w-]+/g, '').replace(/\s+/g, ' ').trim() || raw;
   const { data } = await sb.from('tasks').insert({ date: todayStr(), text, tags }).select().single();
   if (data) { tasks.push(data); renderTasks(); }
+});
+
+// coming up (next 2 days)
+function fmtAhead(d) {
+  const dt = new Date(d + 'T12:00:00Z');
+  const wd = new Intl.DateTimeFormat('en-US', { timeZone: NY, weekday: 'short' }).format(dt).toLowerCase();
+  const md = new Intl.DateTimeFormat('en-US', { timeZone: NY, month: 'short', day: 'numeric' }).format(dt).toLowerCase();
+  return { wd, md };
+}
+function renderAhead(t) {
+  const days = [addDays(t, 1), addDays(t, 2)];
+  let html = '<div class="ahead-label micro">coming up</div><div class="ahead-cols">';
+  days.forEach((d, i) => {
+    const items = aheadAll.filter(x => x.date === d);
+    const f = fmtAhead(d);
+    const hdr = i === 0 ? `tomorrow · ${f.md}` : `${f.wd} · ${f.md}`;
+    html += `<div class="ahead-col"><div class="ahead-hdr">${hdr}</div>`;
+    if (items.length) {
+      html += '<ul class="ahead-list">' + items.map(x => {
+        const tags = (x.tags && x.tags.length) ? x.tags.map(g => `<span class="tag">${escapeHtml(g)}</span>`).join('') : '';
+        return `<li data-id="${x.id}"><span class="apri${x.priority ? ' p'+x.priority : ''}"></span><span class="atx">${escapeHtml(x.text)}${tags}</span><span class="adel" data-del="1">×</span></li>`;
+      }).join('') + '</ul>';
+    } else {
+      html += '<div class="ahead-empty">nothing yet</div>';
+    }
+    html += `<input class="ahead-add" data-date="${d}" placeholder="add…" autocomplete="off"></div>`;
+  });
+  $('ahead').innerHTML = html + '</div>';
+}
+$('ahead').addEventListener('click', async e => {
+  if (!e.target.dataset.del) return;
+  const li = e.target.closest('li'); if (!li) return;
+  const id = li.dataset.id;
+  aheadAll = aheadAll.filter(x => x.id !== id);
+  renderAhead(todayStr());
+  await sb.from('tasks').delete().eq('id', id);
+});
+$('ahead').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter' || !e.target.classList.contains('ahead-add') || !e.target.value.trim()) return;
+  const date = e.target.dataset.date;
+  const raw = e.target.value.trim(); e.target.value = '';
+  const tags = (raw.match(/#[\w-]+/g) || []).map(s => s.slice(1).toLowerCase());
+  const text = raw.replace(/#[\w-]+/g, '').replace(/\s+/g, ' ').trim() || raw;
+  const { data } = await sb.from('tasks').insert({ date, text, tags }).select().single();
+  if (data) { aheadAll.push(data); renderAhead(todayStr()); const inp = document.querySelector(`.ahead-add[data-date="${date}"]`); if (inp) inp.focus(); }
 });
 
 // briefing
