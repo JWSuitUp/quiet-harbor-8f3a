@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>leave — dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#0a0e14; --bg-2:#10151d; --ink:#e8eae6; --ink-2:#a4acb8; --ink-3:#757e8d;
+  --hair:rgba(255,255,255,0.10); --hair-2:rgba(255,255,255,0.06);
+  --ice:#a9c6e8; --ice-dim:rgba(169,198,232,0.14); --ember:#c08552;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg)}
+body{font-family:"Instrument Sans",system-ui,sans-serif;color:var(--ink);min-height:100vh;padding:0 clamp(18px,5vw,88px)}
+.serif{font-family:"Instrument Serif",serif;font-weight:400}
+.wrap{max-width:1000px;margin:0 auto}
+.micro{font-size:11px;letter-spacing:.14em;color:var(--ink-3);font-weight:500}
+.whisper{font-size:12.5px;letter-spacing:.04em;color:var(--ink-2)}
+.rule{border:none;border-top:1px solid var(--hair-2)}
+.hidden{display:none!important}
+
+/* auth */
+#auth{max-width:340px;margin:22vh auto 0;text-align:center}
+#auth .serif{font-size:30px}
+#auth p{margin-top:10px;font-size:12.5px;color:var(--ink-3)}
+#auth input{width:100%;margin-top:22px;background:none;border:none;border-bottom:1px solid var(--hair);padding:10px 2px;color:var(--ink);font-family:inherit;font-size:15px;outline:none;text-align:center;letter-spacing:.04em}
+#auth button{margin-top:22px;background:none;border:1px solid var(--hair);border-radius:999px;color:var(--ink-2);font-family:inherit;font-size:12px;letter-spacing:.12em;padding:9px 26px;cursor:pointer}
+#auth button:hover{border-color:var(--ice);color:var(--ice)}
+#authmsg{margin-top:14px;font-size:12px;color:var(--ink-3);min-height:16px}
+
+/* header */
+header{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;padding:30px 0 24px;border-bottom:1px solid var(--hair-2)}
+header .greet{font-size:24px;letter-spacing:0}
+header .r{margin-left:auto;font-size:12px;letter-spacing:.12em;color:var(--ink-3)}
+
+/* focal */
+.focal{display:flex;align-items:flex-start;gap:clamp(40px,7vw,96px);padding:56px 0 52px}
+.focal-l{flex:1.5;min-width:0}
+.goal{font-size:clamp(32px,4.8vw,52px);line-height:1.16;letter-spacing:-.005em;margin-top:16px;max-width:24ch}
+.goal em{font-style:italic;color:var(--ice)}
+.tasks{list-style:none;margin-top:24px;max-width:480px}
+.tasks li{display:flex;align-items:center;gap:14px;padding:9px 0;cursor:pointer;border-bottom:1px solid var(--hair-2)}
+.tasks li:last-child{border-bottom:none}
+.cb{flex:none;width:17px;height:17px;border-radius:50%;border:1px solid var(--ink-3);font-size:10px;line-height:15px;text-align:center;color:var(--bg)}
+li.done .cb{background:var(--ice);border-color:var(--ice)}
+.tx{font-size:14px;color:var(--ink);letter-spacing:.01em}
+li.done .tx{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--hair)}
+.thint{font-style:normal;font-size:11px;color:var(--ink-3);letter-spacing:.06em}
+.addrow{margin-top:10px;max-width:480px}
+.addrow input{width:100%;background:none;border:none;border-bottom:1px solid var(--hair-2);padding:9px 0 9px 31px;color:var(--ink);font-family:inherit;font-size:13px;outline:none}
+.addrow input::placeholder{color:var(--ink-3);opacity:.7}
+.addrow input:focus{border-bottom-color:var(--hair)}
+.focal-r{flex:1;display:flex;flex-direction:column;align-items:flex-end;text-align:right;padding-top:20px}
+.ring-note{margin-top:16px}
+.ring-note .whisper{margin-top:6px;color:var(--ink-3)}
+
+/* briefing */
+.brief{padding:34px 0 38px}
+.brief-cols{display:flex;gap:clamp(28px,4vw,56px);margin-top:6px;flex-wrap:wrap}
+.brief-cols .brief-item{flex:1;min-width:220px}
+.brief-item{display:flex;gap:14px;margin-top:16px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.brief-item .src{flex:none;width:72px;font-size:10px;letter-spacing:.12em;color:var(--ink-3);padding-top:3px}
+.brief a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--hair);transition:border-color .15s}
+.brief a:hover{border-bottom-color:var(--ice);color:var(--ice)}
+
+/* pillars */
+.pillars{display:flex;flex-wrap:wrap;gap:32px 0;padding:48px 0 52px}
+.pillar{flex:1;min-width:150px}
+.pillar .figure{font-size:44px;line-height:1;margin:16px 0 10px;letter-spacing:-.01em}
+.pillar .figure small{font-size:21px;color:var(--ink-3)}
+.pillar .figure .unit{font-size:21px;color:var(--ink-3)}
+
+/* week */
+.week{display:flex;gap:clamp(32px,5vw,64px);padding:46px 0 44px;flex-wrap:wrap}
+.wcol{flex:1.1;min-width:260px}
+.kept-col{flex:.9;min-width:220px}
+.chart{margin-top:22px;display:block;width:100%}
+.cax{font-size:10px;fill:var(--ink-3);letter-spacing:.12em;font-family:"Instrument Sans",sans-serif}
+.cval{font-size:11px;fill:var(--ink-2);letter-spacing:.04em;font-family:"Instrument Sans",sans-serif}
+.keptgrid{display:grid;grid-template-columns:60px repeat(7,1fr);margin-top:24px;row-gap:9px;align-items:center}
+.keptgrid .rowlabel{text-align:left}
+.kc{text-align:center;font-size:11.5px;color:var(--ice);height:16px;line-height:16px;cursor:default}
+.kc.today-cell{cursor:pointer}
+.kc.n{color:var(--ink-3)}
+.kc.r{color:var(--ice);font-size:10px}
+.kc.d{color:var(--ink-3);font-size:10px;letter-spacing:.12em;padding-top:4px}
+.ktick{color:var(--ice)}
+.nodata{margin-top:20px;font-size:12px;color:var(--ink-3);font-style:italic}
+
+/* lower */
+.lower{display:flex;gap:clamp(40px,6vw,84px);padding:44px 0 48px;flex-wrap:wrap}
+.lcol{flex:1;min-width:260px}
+.quote{font-size:19px;font-style:italic;line-height:1.45;color:var(--ink-2);margin-top:16px;max-width:40ch}
+.qmeta{margin-top:12px;color:var(--ink-3)}
+.tellbox{width:100%;min-height:92px;margin-top:16px;background:none;border:1px solid var(--hair-2);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:inherit;font-size:13px;line-height:1.5;resize:vertical;outline:none}
+.tellbox::placeholder{color:var(--ink-3);opacity:.75}
+.tellbox:focus{border-color:var(--hair)}
+.tellsave{margin-top:10px;font-size:11px;letter-spacing:.12em;color:var(--ink-3);background:none;border:1px solid var(--hair-2);border-radius:999px;padding:7px 18px;cursor:pointer;font-family:inherit}
+.tellsave:hover{color:var(--ice);border-color:var(--ice)}
+#tellmsg{margin-left:12px;font-size:11px;color:var(--ink-3)}
+
+/* timeline */
+.tl-block{padding:38px 0 12px}
+.tl{position:relative;height:14px;margin-top:26px}
+.tl-track{position:absolute;top:6px;left:0;right:0;height:1px;background:var(--hair)}
+.tl-done{position:absolute;top:5.5px;left:0;height:2px;background:var(--ice)}
+.tl-tick{position:absolute;top:3px;width:1px;height:7px;background:var(--hair)}
+.tl-dot{position:absolute;top:2.5px;width:8px;height:8px;border-radius:50%;background:var(--ice);transform:translateX(-50%)}
+.tl-labels{position:relative;height:16px;margin-top:10px}
+.tl-labels span{position:absolute;font-size:10.5px;letter-spacing:.16em;color:var(--ink-3)}
+.tl-day{position:absolute;transform:translateX(-50%);top:-46px;font-size:10px;letter-spacing:.16em;color:var(--ink-2)}
+footer{display:flex;padding:24px 0 30px;flex-wrap:wrap;gap:8px}
+footer span{font-size:10px;letter-spacing:.14em;color:var(--ink-3)}
+footer .r{margin-left:auto}
+@media (max-width:820px){
+  .focal{flex-direction:column}
+  .focal-r{align-items:flex-start;text-align:left;padding-top:0}
+}
+</style>
+</head>
+<body>
+
+<div id="auth" class="hidden">
+  <div class="serif" id="authTitle">Hello, Joanna.</div>
+  <p id="authHelp">your dashboard is private — sign in with your email.</p>
+  <input id="authEmail" type="email" placeholder="email" value="jiachengwangjoanna@gmail.com">
+  <input id="authPw" type="password" placeholder="password">
+  <button id="authBtn">sign in</button>
+  <div id="authmsg"></div>
+</div>
+
+<div id="app" class="wrap hidden">
+  <header>
+    <span class="serif greet" id="greet">Hello, Joanna.</span>
+    <span class="r" id="daymeta"></span>
+  </header>
+
+  <section class="focal">
+    <div class="focal-l">
+      <div class="micro">today's theme</div>
+      <div class="goal serif" id="theme">a quiet day.</div>
+      <ul class="tasks" id="tasks"></ul>
+      <div class="addrow"><input id="newtask" type="text" placeholder="add something for today…" autocomplete="off"></div>
+    </div>
+    <div class="focal-r">
+      <svg width="164" height="164" viewBox="0 0 164 164">
+        <circle cx="82" cy="82" r="70" fill="none" stroke="var(--ice-dim)" stroke-width="3"/>
+        <circle id="ringArc" cx="82" cy="82" r="70" fill="none" stroke="var(--ice)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 439.8" transform="rotate(-90 82 82)"/>
+        <text id="ringNum" x="82" y="86" text-anchor="middle" fill="var(--ink)" font-family="Instrument Serif,serif" font-size="40">0/0</text>
+        <text x="82" y="108" text-anchor="middle" fill="var(--ink-3)" font-family="Instrument Sans,sans-serif" font-size="11" letter-spacing=".12em">today</text>
+      </svg>
+      <div class="ring-note">
+        <div class="micro">the day</div>
+        <div class="whisper" id="ringSub"></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="brief">
+    <div class="micro" id="briefLabel">this morning's ai briefing</div>
+    <div class="brief-cols" id="briefItems"><div class="nodata">no briefing yet — claude writes one each morning.</div></div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="pillars">
+    <div class="pillar"><div class="micro">app</div><div class="figure serif" id="pApp">—</div><div class="whisper" id="pAppSub">waiting for build log</div></div>
+    <div class="pillar"><div class="micro">body</div><div class="figure serif" id="pBody">—</div><div class="whisper" id="pBodySub">days moving this week</div></div>
+    <div class="pillar"><div class="micro">mind</div><div class="figure serif" id="pMind">—</div><div class="whisper" id="pMindSub">avg sleep · 7 nights</div></div>
+    <div class="pillar"><div class="micro">ahead</div><div class="figure serif" id="pAhead">—</div><div class="whisper" id="pAheadSub">reflections kept</div></div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="week">
+    <div class="wcol">
+      <div class="micro">the week · hours in the box</div>
+      <div id="hoursChart"><div class="nodata">logs appear once you start building.</div></div>
+    </div>
+    <div class="wcol">
+      <div class="micro">sleep · 14 nights</div>
+      <div id="sleepChart"><div class="nodata">no sleep data yet.</div></div>
+    </div>
+    <div class="wcol kept-col">
+      <div class="micro">kept · tap today to log</div>
+      <div class="keptgrid" id="keptGrid"></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="lower">
+    <div class="lcol">
+      <div class="micro" id="reflLabel">last reflection</div>
+      <div class="quote serif" id="reflQuote">nothing yet — tonight is a good time to start.</div>
+      <div class="whisper qmeta" id="reflMeta"></div>
+    </div>
+    <div class="lcol">
+      <div class="micro">tell claude</div>
+      <textarea class="tellbox" id="tellbox" placeholder="a thought, a worry, a todo, tonight's reflection — anything. it goes into your database and shapes tomorrow."></textarea>
+      <div><button class="tellsave" id="tellsave">save</button><span id="tellmsg"></span></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="tl-block">
+    <div class="micro">the 82 days · aug 10 → oct 30</div>
+    <div class="tl" id="tl"></div>
+    <div class="tl-labels">
+      <span style="left:0">rest</span><span style="left:17%;padding-left:14px">build</span>
+      <span style="left:64%;padding-left:14px">china</span><span style="right:0">return</span>
+    </div>
+  </section>
+
+  <footer>
+    <span id="footL">lifeos · live</span>
+    <span class="r"><a href="#" id="signout" style="color:var(--ink-3);text-decoration:none;letter-spacing:.14em;font-size:10px">sign out</a></span>
+  </footer>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SB_URL = 'https://nhjanqrehfujwgndgkvx.supabase.co';
+const SB_KEY = 'sb_publishable_2u-9iL7Q-pynkr8LkDFNqw_BJwjvo0V';
+const sb = createClient(SB_URL, SB_KEY);
+const $ = id => document.getElementById(id);
+const NY = 'America/New_York';
+const todayStr = () => new Intl.DateTimeFormat('en-CA', { timeZone: NY }).format(new Date());
+const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0,10); };
+const C = 439.8;
+const START = '2026-08-10', END = '2026-10-30';
+
+// ---------- auth ----------
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { $('auth').classList.add('hidden'); $('app').classList.remove('hidden'); load(); return; }
+  $('auth').classList.remove('hidden');
+}
+$('authBtn').addEventListener('click', async () => {
+  $('authmsg').textContent = 'signing in…';
+  const { error } = await sb.auth.signInWithPassword({ email: $('authEmail').value.trim(), password: $('authPw').value });
+  if (error) { $('authmsg').textContent = error.message; return; }
+  location.reload();
+});
+$('authPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('authBtn').click(); });
+$('signout').addEventListener('click', async e => { e.preventDefault(); await sb.auth.signOut(); location.reload(); });
+
+// ---------- load & render ----------
+let tasks = [];
+async function load() {
+  const t = todayStr();
+  greeting(); daymeta(t); timeline(t);
+  const wkStart = mondayOf(t);
+  const [dayRow, taskRows, brief, habitRows, logRows, refl, mApp, mSquash, mHours, mSleep] = await Promise.all([
+    sb.from('days').select('*').eq('date', t).maybeSingle(),
+    sb.from('tasks').select('*').eq('date', t).order('created_at'),
+    sb.from('briefings').select('*').eq('date', t).maybeSingle(),
+    sb.from('habits').select('*').eq('active', true).order('sort'),
+    sb.from('habit_logs').select('*').gte('date', wkStart).lte('date', addDays(wkStart,6)),
+    sb.from('reflections').select('*').order('date', { ascending: false }).limit(1),
+    sb.from('metrics').select('*').eq('key','app_progress').order('date',{ascending:false}).limit(1),
+    sb.from('metrics').select('*').eq('key','moved').gte('date', addDays(t,-6)),
+    sb.from('metrics').select('*').eq('key','app_hours').gte('date', wkStart).lte('date', addDays(wkStart,6)),
+    sb.from('metrics').select('*').eq('key','sleep_minutes').gte('date', addDays(t,-13)),
+  ]);
+  if (dayRow.data?.theme) $('theme').innerHTML = escapeHtml(dayRow.data.theme).replace(/\*(.+?)\*/g, '<em>$1</em>');
+  tasks = taskRows.data || [];
+  renderTasks(); renderBrief(brief.data);
+  renderPillars(mApp.data, mSquash.data, mSleep.data);
+  renderHours(mHours.data || [], wkStart, t);
+  renderSleep(mSleep.data || [], t);
+  renderKept(habitRows.data || [], logRows.data || [], wkStart, t);
+  renderRefl(refl.data && refl.data[0]);
+  const rCount = await sb.from('reflections').select('id', { count: 'exact', head: true });
+  if (rCount.count != null) $('pAhead').textContent = rCount.count;
+}
+function greeting() {
+  const h = parseInt(new Intl.DateTimeFormat('en-US', { timeZone: NY, hour: 'numeric', hour12: false }).format(new Date()));
+  $('greet').textContent = h < 5 ? 'Up late, Joanna.' : h < 12 ? 'Good morning, Joanna.' : h < 18 ? 'Good afternoon, Joanna.' : 'Good evening, Joanna.';
+}
+function dayIndex(t) { return Math.floor((Date.parse(t) - Date.parse(START)) / 86400000) + 1; }
+function phaseOf(t) {
+  if (t < START) return 'pre-leave';
+  if (t <= '2026-08-23') return 'rest-first';
+  if (t <= '2026-09-27') return 'build';
+  if (t <= '2026-09-30') return 'wind-down';
+  if (t <= '2026-10-28') return 'china';
+  if (t <= END) return 'return';
+  return 'after';
+}
+function daymeta(t) {
+  const d = new Intl.DateTimeFormat('en-US', { timeZone: NY, weekday: 'short', month: 'short', day: 'numeric' }).format(new Date()).toLowerCase();
+  const idx = dayIndex(t);
+  const mid = idx < 1 ? `${1 - idx} days until leave` : idx > 82 ? 'leave complete' : `day ${idx} of 82`;
+  $('daymeta').textContent = `${d} · ${mid} · ${phaseOf(t)}`;
+}
+function mondayOf(t) { const d = new Date(t + 'T12:00:00Z'); const w = (d.getUTCDay() + 6) % 7; return addDays(t, -w); }
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+// tasks
+function renderTasks() {
+  $('tasks').innerHTML = tasks.map(t =>
+    `<li data-id="${t.id}" class="${t.done ? 'done' : ''}"><span class="cb">${t.done ? '✓' : ''}</span><span class="tx">${escapeHtml(t.text)}${t.hint ? ` <i class="thint">· ${escapeHtml(t.hint)}</i>` : ''}</span></li>`).join('');
+  const done = tasks.filter(t => t.done).length, total = tasks.length;
+  $('ringArc').setAttribute('stroke-dasharray', `${total ? C*done/total : 0} ${C}`);
+  $('ringNum').textContent = `${done}/${total}`;
+  const left = total - done;
+  $('ringSub').textContent = total === 0 ? 'nothing planned — that can be the plan' : left === 0 ? 'all done — the day is yours' : left === 1 ? 'one to go' : `${['','one','two','three','four','five','six','seven','eight','nine'][left] || left} to go — no rush`;
+}
+$('tasks').addEventListener('click', async e => {
+  const li = e.target.closest('li'); if (!li) return;
+  const task = tasks.find(t => t.id === li.dataset.id); if (!task) return;
+  task.done = !task.done; renderTasks();
+  await sb.from('tasks').update({ done: task.done, done_at: task.done ? new Date().toISOString() : null }).eq('id', task.id);
+});
+$('newtask').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter' || !e.target.value.trim()) return;
+  const text = e.target.value.trim(); e.target.value = '';
+  const { data } = await sb.from('tasks').insert({ date: todayStr(), text }).select().single();
+  if (data) { tasks.push(data); renderTasks(); }
+});
+
+// briefing
+function renderBrief(b) {
+  if (!b || !Array.isArray(b.items) || !b.items.length) return;
+  $('briefLabel').innerHTML = `this morning's ai briefing · ~30 min read <span class="ktick">✓</span>`;
+  $('briefItems').innerHTML = b.items.map(i =>
+    `<div class="brief-item"><span class="src">${escapeHtml(i.source || '')}</span><span><a href="${i.url}" target="_blank" rel="noopener">${escapeHtml(i.title)}</a>${i.note ? ` — ${escapeHtml(i.note)}` : ''}</span></div>`).join('');
+}
+
+// pillars
+function renderPillars(app, moved, sleep) {
+  if (app && app[0]) { $('pApp').innerHTML = `${Math.round(app[0].value)}<small>%</small>`; $('pAppSub').textContent = 'toward testflight'; }
+  if (moved && moved.length) { $('pBody').innerHTML = `${moved.filter(m => +m.value > 0).length}<small> / 7</small>`; }
+  if (sleep && sleep.length) {
+    const last7 = sleep.slice(-7);
+    const avg = last7.reduce((s,m) => s + +m.value, 0) / last7.length;
+    $('pMind').innerHTML = `${Math.floor(avg/60)}<span class="unit">h</span> ${Math.round(avg%60)}<span class="unit">m</span>`;
+  }
+}
+
+// hours chart
+function renderHours(rows, wkStart, t) {
+  if (!rows.length) return;
+  const byDate = Object.fromEntries(rows.map(r => [r.date, +r.value]));
+  const days = [...Array(7)].map((_, i) => addDays(wkStart, i));
+  const max = Math.max(6, ...rows.map(r => +r.value));
+  const y = h => 120 - h * (96 / max), letters = ['m','t','w','t','f','s','s'];
+  let svg = `<svg class="chart" viewBox="0 0 420 148"><line x1="0" y1="120" x2="420" y2="120" stroke="var(--hair)" stroke-width="1"/><line x1="0" y1="${y(4)}" x2="420" y2="${y(4)}" stroke="var(--hair-2)" stroke-width="1"/><text class="cax" x="420" y="${y(4)-6}" text-anchor="end">4h</text>`;
+  days.forEach((d, i) => {
+    const cx = 48 + i * 55, v = byDate[d];
+    if (v != null) {
+      const over = v > 4, today = d === t;
+      svg += `<rect x="${cx-7}" y="${y(v)}" width="14" height="${120 - y(v)}" rx="2" fill="var(--${over ? 'ember' : 'ice'})" opacity="${today ? .45 : over ? .9 : .75}"/>`;
+      if (over) svg += `<text class="cval" x="${cx}" y="${y(v)-8}" text-anchor="middle" fill="var(--ember)">${v}</text>`;
+    }
+    svg += `<text class="cax" x="${cx}" y="138" text-anchor="middle">${letters[i]}</text>`;
+  });
+  $('hoursChart').innerHTML = svg + '</svg>';
+}
+
+// sleep chart
+function renderSleep(rows, t) {
+  if (rows.length < 2) return;
+  const pts = rows.map(r => ({ d: r.date, v: +r.value }));
+  const min = Math.min(...pts.map(p => p.v)) - 20, max = Math.max(...pts.map(p => p.v)) + 20;
+  const x = i => 8 + i * (403 / (pts.length - 1)), y = v => 120 - (v - min) * (100 / (max - min));
+  const line = pts.map((p, i) => `${x(i)},${y(p.v)}`).join(' ');
+  const last = pts[pts.length - 1];
+  const fmt = m => `${Math.floor(m/60)}h ${String(Math.round(m%60)).padStart(2,'0')}m`;
+  $('sleepChart').innerHTML = `<svg class="chart" viewBox="0 0 420 148">
+    <line x1="0" y1="120" x2="420" y2="120" stroke="var(--hair)" stroke-width="1"/>
+    <path d="M${line.replace(/ /g,' L')} L${x(pts.length-1)},120 L8,120 Z" fill="var(--ice)" opacity="0.06"/>
+    <polyline points="${line}" fill="none" stroke="var(--ice)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>
+    <circle cx="${x(pts.length-1)}" cy="${y(last.v)}" r="3" fill="var(--ice)"/>
+    <text class="cval" x="${x(pts.length-1)}" y="${y(last.v)-12}" text-anchor="end">${fmt(last.v)}</text>
+    <text class="cax" x="8" y="138">${pts[0].d.slice(5).replace('-','/')}</text>
+    <text class="cax" x="411" y="138" text-anchor="end">${last.d.slice(5).replace('-','/')}</text></svg>`;
+}
+
+// kept grid
+function renderKept(habits, logs, wkStart, t) {
+  const days = [...Array(7)].map((_, i) => addDays(wkStart, i));
+  const letters = ['m','t','w','t','f','s','s'];
+  let html = '';
+  habits.forEach(h => {
+    html += `<span class="micro rowlabel">${escapeHtml(h.label)}</span>`;
+    days.forEach(d => {
+      const log = logs.find(l => l.habit_key === h.key && l.date === d);
+      const isToday = d === t, cls = isToday ? ' today-cell' : '';
+      if (log?.status === 'kept') html += `<span class="kc${cls}" data-h="${h.key}" data-d="${d}">✓</span>`;
+      else if (log?.status === 'rest') html += `<span class="kc r${cls}" data-h="${h.key}" data-d="${d}">○</span>`;
+      else if (d > t) html += `<span class="kc n${cls}" data-h="${h.key}" data-d="${d}"></span>`;
+      else html += `<span class="kc n${cls}" data-h="${h.key}" data-d="${d}">·</span>`;
+    });
+  });
+  html += '<span></span>' + letters.map(l => `<span class="kc d">${l}</span>`).join('');
+  $('keptGrid').innerHTML = html;
+  $('keptGrid').onclick = async e => {
+    const el = e.target.closest('.today-cell'); if (!el) return;
+    const kept = el.textContent === '✓';
+    el.textContent = kept ? '·' : '✓'; el.classList.toggle('n', kept);
+    if (kept) await sb.from('habit_logs').delete().eq('date', el.dataset.d).eq('habit_key', el.dataset.h);
+    else await sb.from('habit_logs').upsert({ date: el.dataset.d, habit_key: el.dataset.h, status: 'kept' }, { onConflict: 'date,habit_key' });
+  };
+}
+
+// reflection + notes
+function renderRefl(r) {
+  if (!r) return;
+  $('reflLabel').innerHTML = `last reflection · ${r.date.slice(5).replace('-','/')}`;
+  $('reflQuote').textContent = `“${r.text}”`;
+  $('reflMeta').textContent = r.mood ? `mood ${r.mood} / 5 · rest is progress` : 'rest is progress';
+}
+$('tellsave').addEventListener('click', async () => {
+  const v = $('tellbox').value.trim(); if (!v) return;
+  $('tellmsg').textContent = 'saving…';
+  const { error } = await sb.from('notes').insert({ text: v });
+  $('tellmsg').textContent = error ? error.message : 'saved — claude will read this ✓';
+  if (!error) $('tellbox').value = '';
+});
+
+// timeline
+function timeline(t) {
+  const pct = Math.min(100, Math.max(0, (Date.parse(t) - Date.parse(START)) / (Date.parse(END) - Date.parse(START)) * 100));
+  $('tl').innerHTML = `<span class="tl-day" style="left:${pct}%">${dayIndex(t) < 1 ? 'soon' : 'day ' + dayIndex(t)}</span>
+    <div class="tl-track"></div><div class="tl-done" style="width:${pct}%"></div>
+    <div class="tl-tick" style="left:17%"></div><div class="tl-tick" style="left:64%"></div><div class="tl-tick" style="left:97.5%"></div>
+    <div class="tl-dot" style="left:${pct}%"></div>`;
+}
+initAuth();
+</script>
+</body>
+</html>
