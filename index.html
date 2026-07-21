@@ -44,16 +44,25 @@ header .r{margin-left:auto;font-size:12px;letter-spacing:.12em;color:var(--ink-3
 .focal-l{flex:1.5;min-width:0}
 .goal{font-size:clamp(32px,4.8vw,52px);line-height:1.16;letter-spacing:-.005em;margin-top:16px;max-width:24ch}
 .goal em{font-style:italic;color:var(--ice)}
-.tasks{list-style:none;margin-top:24px;max-width:480px}
-.tasks li{display:flex;align-items:center;gap:14px;padding:9px 0;cursor:pointer;border-bottom:1px solid var(--hair-2)}
+.tasks{list-style:none;margin-top:24px;max-width:520px}
+.tasks li{display:flex;align-items:center;gap:11px;padding:9px 0;cursor:pointer;border-bottom:1px solid var(--hair-2)}
 .tasks li:last-child{border-bottom:none}
+.pri{flex:none;width:5px;height:5px;border-radius:50%;background:none}
+.pri.p1{background:var(--ice)}
+.pri.p2{background:var(--ink-3)}
+.pri.p3{background:var(--hair)}
 .cb{flex:none;width:17px;height:17px;border-radius:50%;border:1px solid var(--ink-3);font-size:10px;line-height:15px;text-align:center;color:var(--bg)}
 li.done .cb{background:var(--ice);border-color:var(--ice)}
-.tx{font-size:14px;color:var(--ink);letter-spacing:.01em}
+.tx{flex:1;min-width:0;font-size:14px;color:var(--ink);letter-spacing:.01em}
 li.done .tx{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--hair)}
 .thint{font-style:normal;font-size:11px;color:var(--ink-3);letter-spacing:.06em}
-.addrow{margin-top:10px;max-width:480px}
-.addrow input{width:100%;background:none;border:none;border-bottom:1px solid var(--hair-2);padding:9px 0 9px 31px;color:var(--ink);font-family:inherit;font-size:13px;outline:none}
+.tag{display:inline-block;margin-left:7px;font-size:10px;letter-spacing:.07em;color:var(--ink-3);border:1px solid var(--hair-2);border-radius:999px;padding:1px 7px;vertical-align:1px}
+.del{flex:none;color:var(--ink-3);opacity:0;cursor:pointer;font-size:17px;line-height:1;padding:0 2px 2px;transition:opacity .15s,color .15s}
+.tasks li:hover .del{opacity:.55}
+.del:hover{opacity:1;color:var(--ink)}
+@media(hover:none){.del{opacity:.4}}
+.addrow{margin-top:10px;max-width:520px}
+.addrow input{width:100%;background:none;border:none;border-bottom:1px solid var(--hair-2);padding:9px 0 9px 27px;color:var(--ink);font-family:inherit;font-size:13px;outline:none}
 .addrow input::placeholder{color:var(--ink-3);opacity:.7}
 .addrow input:focus{border-bottom-color:var(--hair)}
 .focal-r{flex:1;display:flex;flex-direction:column;align-items:flex-end;text-align:right;padding-top:20px}
@@ -98,12 +107,14 @@ li.done .tx{color:var(--ink-3);text-decoration:line-through;text-decoration-colo
 .lcol{flex:1;min-width:260px}
 .quote{font-size:19px;font-style:italic;line-height:1.45;color:var(--ink-2);margin-top:16px;max-width:40ch}
 .qmeta{margin-top:12px;color:var(--ink-3)}
-.tellbox{width:100%;min-height:92px;margin-top:16px;background:none;border:1px solid var(--hair-2);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:inherit;font-size:13px;line-height:1.5;resize:vertical;outline:none}
-.tellbox::placeholder{color:var(--ink-3);opacity:.75}
-.tellbox:focus{border-color:var(--hair)}
-.tellsave{margin-top:10px;font-size:11px;letter-spacing:.12em;color:var(--ink-3);background:none;border:1px solid var(--hair-2);border-radius:999px;padding:7px 18px;cursor:pointer;font-family:inherit}
-.tellsave:hover{color:var(--ice);border-color:var(--ice)}
-#tellmsg{margin-left:12px;font-size:11px;color:var(--ink-3)}
+.composer{margin-top:16px;border:1px solid var(--hair-2);border-radius:14px;transition:border-color .15s;overflow:hidden}
+.composer:focus-within{border-color:var(--hair)}
+.tellbox{width:100%;min-height:84px;background:none;border:none;padding:14px 16px 8px;color:var(--ink);font-family:inherit;font-size:14px;line-height:1.55;resize:vertical;outline:none;display:block}
+.tellbox::placeholder{color:var(--ink-3)}
+.composer-foot{display:flex;align-items:center;gap:12px;padding:6px 12px 10px 16px}
+.composer-foot .hint{flex:1;min-width:0;font-size:11px;letter-spacing:.03em;color:var(--ink-3)}
+.send{flex:none;font-size:11px;letter-spacing:.12em;color:var(--ink-2);background:none;border:1px solid var(--hair);border-radius:999px;padding:7px 17px;cursor:pointer;font-family:inherit;transition:.15s}
+.send:hover{color:var(--ice);border-color:var(--ice)}
 
 /* timeline */
 .tl-block{padding:38px 0 12px}
@@ -205,8 +216,13 @@ footer .r{margin-left:auto}
     </div>
     <div class="lcol">
       <div class="micro">tell claude</div>
-      <textarea class="tellbox" id="tellbox" placeholder="a thought, a worry, a todo, tonight's reflection — anything. it goes into your database and shapes tomorrow."></textarea>
-      <div><button class="tellsave" id="tellsave">save</button><span id="tellmsg"></span></div>
+      <div class="composer">
+        <textarea class="tellbox" id="tellbox" placeholder="what's on your mind?"></textarea>
+        <div class="composer-foot">
+          <span class="hint" id="tellmsg">a thought, a todo, tonight's reflection — it shapes tomorrow</span>
+          <button class="send" id="tellsave">send →</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -262,7 +278,7 @@ async function load() {
   const wkStart = mondayOf(t);
   const [dayRow, taskRows, brief, habitRows, logRows, refl, mApp, mSquash, mHours, mSleep] = await Promise.all([
     sb.from('days').select('*').eq('date', t).maybeSingle(),
-    sb.from('tasks').select('*').eq('date', t).order('created_at'),
+    sb.from('tasks').select('*').eq('date', t).order('priority', { nullsFirst: false }).order('created_at'),
     sb.from('briefings').select('*').eq('date', t).maybeSingle(),
     sb.from('habits').select('*').eq('active', true).order('sort'),
     sb.from('habit_logs').select('*').gte('date', wkStart).lte('date', addDays(wkStart,6)),
@@ -308,8 +324,10 @@ function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 
 // tasks
 function renderTasks() {
-  $('tasks').innerHTML = tasks.map(t =>
-    `<li data-id="${t.id}" class="${t.done ? 'done' : ''}"><span class="cb">${t.done ? '✓' : ''}</span><span class="tx">${escapeHtml(t.text)}${t.hint ? ` <i class="thint">· ${escapeHtml(t.hint)}</i>` : ''}</span></li>`).join('');
+  $('tasks').innerHTML = tasks.map(t => {
+    const tags = (t.tags && t.tags.length) ? t.tags.map(g => `<span class="tag">${escapeHtml(g)}</span>`).join('') : '';
+    return `<li data-id="${t.id}" class="${t.done ? 'done' : ''}"><span class="pri${t.priority ? ' p'+t.priority : ''}"></span><span class="cb">${t.done ? '✓' : ''}</span><span class="tx">${escapeHtml(t.text)}${t.hint ? ` <i class="thint">· ${escapeHtml(t.hint)}</i>` : ''}${tags}</span><span class="del" data-del="1">×</span></li>`;
+  }).join('');
   const done = tasks.filter(t => t.done).length, total = tasks.length;
   $('ringArc').setAttribute('stroke-dasharray', `${total ? C*done/total : 0} ${C}`);
   $('ringNum').textContent = `${done}/${total}`;
@@ -318,14 +336,23 @@ function renderTasks() {
 }
 $('tasks').addEventListener('click', async e => {
   const li = e.target.closest('li'); if (!li) return;
-  const task = tasks.find(t => t.id === li.dataset.id); if (!task) return;
+  const id = li.dataset.id;
+  if (e.target.dataset.del) {
+    tasks = tasks.filter(t => t.id !== id); renderTasks();
+    await sb.from('tasks').delete().eq('id', id);
+    return;
+  }
+  const task = tasks.find(t => t.id === id); if (!task) return;
   task.done = !task.done; renderTasks();
   await sb.from('tasks').update({ done: task.done, done_at: task.done ? new Date().toISOString() : null }).eq('id', task.id);
 });
 $('newtask').addEventListener('keydown', async e => {
   if (e.key !== 'Enter' || !e.target.value.trim()) return;
-  const text = e.target.value.trim(); e.target.value = '';
-  const { data } = await sb.from('tasks').insert({ date: todayStr(), text }).select().single();
+  let raw = e.target.value.trim(); e.target.value = '';
+  // pull #tags out of the text (e.g. "call dentist #health")
+  const tags = (raw.match(/#[\w-]+/g) || []).map(s => s.slice(1).toLowerCase());
+  const text = raw.replace(/#[\w-]+/g, '').replace(/\s+/g, ' ').trim() || raw;
+  const { data } = await sb.from('tasks').insert({ date: todayStr(), text, tags }).select().single();
   if (data) { tasks.push(data); renderTasks(); }
 });
 
@@ -421,13 +448,19 @@ function renderRefl(r) {
   $('reflQuote').textContent = `“${r.text}”`;
   $('reflMeta').textContent = r.mood ? `mood ${r.mood} / 5 · rest is progress` : 'rest is progress';
 }
-$('tellsave').addEventListener('click', async () => {
+const TELL_HINT = "a thought, a todo, tonight's reflection — it shapes tomorrow";
+async function sendNote() {
   const v = $('tellbox').value.trim(); if (!v) return;
-  $('tellmsg').textContent = 'saving…';
+  const btn = $('tellsave'); btn.textContent = 'sending…';
   const { error } = await sb.from('notes').insert({ text: v });
-  $('tellmsg').textContent = error ? error.message : 'saved — claude will read this ✓';
-  if (!error) $('tellbox').value = '';
-});
+  btn.textContent = 'send →';
+  if (error) { $('tellmsg').textContent = error.message; return; }
+  $('tellbox').value = '';
+  $('tellmsg').textContent = 'saved ✓ — claude will read this';
+  setTimeout(() => { $('tellmsg').textContent = TELL_HINT; }, 3500);
+}
+$('tellsave').addEventListener('click', sendNote);
+$('tellbox').addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') sendNote(); });
 
 // timeline
 function timeline(t) {
